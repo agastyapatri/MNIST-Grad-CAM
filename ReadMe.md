@@ -25,6 +25,21 @@ Crudely:
 
 _Re-Write this section_
 
+### **2.1: Creating the ConvNet**
+While MNIST classification is the very first thing everyone cuts their teeth on, it is still useful to revisit the dataset with more sophistication, both as a programmer and as a practitioner. 
+
+Structure of the ConvNet built.
+
+
+
+
+### **2.2 Grad-CAM all the way**
+
+
+
+
+
+
 
 ## **3. Results and Discussion**
 

@@ -19,6 +19,8 @@ class ConvolutionalNetwork(nn.Module):
     def network(self):
         cnn = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=1, kernel_size=5, stride=1, padding=None, dtype=dtype),
+
+            
             nn.ReLU(),
 
 
