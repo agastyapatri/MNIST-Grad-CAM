@@ -1,7 +1,7 @@
 import torch 
 import numpy as np
 import torch.nn as nn 
-dtype = torch.float16
+dtype = torch.float32
 
 
 class ConvolutionalNetwork(nn.Module):
@@ -18,17 +18,37 @@ class ConvolutionalNetwork(nn.Module):
 
     def network(self):
         cnn = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=1, kernel_size=5, stride=1, padding=None, dtype=dtype),
-
-            
+            # Conv Layer 1
+            nn.Conv2d(in_channels=1, out_channels=12, kernel_size=5, stride=1, dtype=dtype),
             nn.ReLU(),
+            nn.MaxPool2d(kernel_size=3),
+            
+            # Conv Layer 2 
+            nn.Conv2d(in_channels=12, out_channels=24, kernel_size=5, stride=1, dtype=dtype),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2),
 
+            # Fully Connected Layer 1
+            nn.Flatten(start_dim=0),
+            nn.Linear(in_features=96, out_features=48, dtype=dtype),
+            nn.Sigmoid(),
 
+            # Fully Connected Layer 2
+            nn.Linear(in_features=48, out_features=10, dtype=dtype),
+            nn.LogSoftmax()
+            
+            
         )
+
         return cnn 
         
         
 
 if __name__ == "__main__":
     model = ConvolutionalNetwork()
-    print(model)
+    
+    testdata = torch.randn(1, 28, 28, dtype=dtype)
+    mlp = model.network()
+    preds = mlp(testdata)
+
+    

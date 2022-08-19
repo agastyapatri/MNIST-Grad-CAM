@@ -85,6 +85,9 @@ if __name__ == "__main__":
     
     loader = Loader(PATH="/home/agastya123/PycharmProjects/DeepLearning/MNIST-Grad-CAM/data/", num_batches=64)
     trainloader, testloader = loader.getdata()
+
+
+
     
 
 

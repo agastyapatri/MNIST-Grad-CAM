@@ -8,6 +8,7 @@ import torch.nn as nn
 # Custom Imports
 from src.loadvis import Loader
 from src.loadvis import Visualizer
+from src.models import ConvolutionalNetwork
 
 
 if __name__ == "__main__":
@@ -22,9 +23,17 @@ if __name__ == "__main__":
 
 
     #3. Building the network 
-    
+    model = ConvolutionalNetwork()
+    cnn = model.network()
     
 
+    #4. Initial Training cycle and Getting baselines
+    
+
+
+
+
+    
 
 
 
