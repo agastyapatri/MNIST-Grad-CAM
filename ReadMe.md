@@ -23,9 +23,6 @@ Crudely:
 5. Improve Model 
 6. Report Results.
 
-_Re-Write this section_
-
-### **2.1: Creating the ConvNet**
 While MNIST classification is the very first thing everyone cuts their teeth on, it is still useful to revisit the dataset with more sophistication, both as a programmer and as a practitioner. 
 
 Structure of the ConvNet built: 
@@ -39,13 +36,13 @@ Structure of the ConvNet built:
   7. Linear(in_features=1, out_features=2, bias=True)
   8. Softmax(dim=None)
 
-
-_Note that this is temporary, and the parameters are not final (or even correct)_
-
+Model Performance: 
 
 
 
-### **2.2 Grad-CAM all the way**
+
+
+
 
 
 

@@ -36,10 +36,7 @@ class ConvolutionalNetwork(nn.Module):
             # Fully Connected Layer 2
             nn.Linear(in_features=48, out_features=10, dtype=dtype),
             nn.LogSoftmax(dim=1)
-            
-            
         )
-
         return cnn 
         
         

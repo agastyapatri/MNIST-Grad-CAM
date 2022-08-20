@@ -1,8 +1,7 @@
 """
 Classes to load, visualize etc
 """
-from pydoc import visiblename
-from socket import TIPC_DEST_DROPPABLE
+
 import numpy as np 
 import torch 
 torch.manual_seed(0)
@@ -56,8 +55,7 @@ class Visualizer:
     """
     Class to Visualize the images in MNIST
         1. visualize(): method to enable the plotting of the digits. 
-        2. distribution(): method to visualize the class distribution of the dataset. 
-        3. 
+        2. plotperf(): method to plot the losses / accuracies for the model 
     """
     def __init__(self):
         pass
@@ -77,8 +75,14 @@ class Visualizer:
         plt.show()
 
 
-    def distribution(self):
-        pass 
+    def plotperf(self, loss_list, num_epochs, train=True):
+        if train:
+            xaxis = np.array(range(num_epochs))
+            yaxis = np.array(loss_list)
+            plt.title(f"Loss-Epoch plot for the training cycle")
+            plt.plot(xaxis, yaxis)
+            plt.grid()
+            plt.show()
 
 
 if __name__ == "__main__":
