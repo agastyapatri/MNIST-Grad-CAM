@@ -29,13 +29,13 @@ class ConvolutionalNetwork(nn.Module):
             nn.MaxPool2d(kernel_size=2),
 
             # Fully Connected Layer 1
-            nn.Flatten(start_dim=0),
+            nn.Flatten(start_dim=1),
             nn.Linear(in_features=96, out_features=48, dtype=dtype),
             nn.Sigmoid(),
 
             # Fully Connected Layer 2
             nn.Linear(in_features=48, out_features=10, dtype=dtype),
-            nn.LogSoftmax()
+            nn.LogSoftmax(dim=1)
             
             
         )

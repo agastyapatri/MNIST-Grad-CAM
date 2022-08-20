@@ -61,7 +61,7 @@ _Note that this is temporary, and the parameters are not final (or even correct)
 _Currently, a list of issues faced:_
 
 1. PyTorch's Conv2D class doesn't seem to be implemented for the datatype torch.float16. This datatype was chosen to alleviate performance burden at runtime, but float32 it is. 
-Turns out that float16 would have been slower anyway due to software conversion to float32, as I dont have tensor cores at hand. Whatever that means.
+A quick search on StackOverflow reveals that float16 would have been slower anyway due to software conversion to float32, as I dont have tensor cores at hand. No idea about the veracity of this statement.
 
 2.   
 

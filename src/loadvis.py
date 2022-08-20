@@ -22,13 +22,13 @@ class Loader(nn.Module):
         1. getdata(): Function to fetch the MNIST data and store into dataloaders.
     """
 
-    def __init__(self, PATH, num_batches):
+    def __init__(self, PATH, batch_size):
         super().__init__()
         self.path = PATH 
-        self.num_batches = num_batches
+        self.batch_size = batch_size
         
     def __str__(self):
-        return f"Trainloader: length = {len(self.getdata()[0])}  | Testloader: length = {len(self.getdata()[1])}\nBatch Size = {self.num_batches}"
+        return f"Trainloader: length = {len(self.getdata()[0])}  | Testloader: length = {len(self.getdata()[1])}\nBatch Size = {self.batch_size}"
 
     def getdata(self):
         trans = transforms.Compose([
@@ -41,9 +41,9 @@ class Loader(nn.Module):
 
 
 
-        trainloader = DataLoader(dataset=trainset, batch_size=self.num_batches, shuffle=True)
+        trainloader = DataLoader(dataset=trainset, batch_size=self.batch_size, shuffle=True)
 
-        testloader = DataLoader(dataset=testset, batch_size=self.num_batches, shuffle=True)
+        testloader = DataLoader(dataset=testset, batch_size=self.batch_size, shuffle=True)
 
         return trainloader, testloader
 
@@ -83,8 +83,10 @@ class Visualizer:
 
 if __name__ == "__main__":
     
-    loader = Loader(PATH="/home/agastya123/PycharmProjects/DeepLearning/MNIST-Grad-CAM/data/", num_batches=64)
+    loader = Loader(PATH="/home/agastya123/PycharmProjects/DeepLearning/MNIST-Grad-CAM/data/", batch_size=128)
     trainloader, testloader = loader.getdata()
+    idx, data= next(iter(trainloader))
+    print(data.shape)
 
 
 
