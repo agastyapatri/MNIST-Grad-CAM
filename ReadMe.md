@@ -2,6 +2,7 @@
 
 _This project aims at implementing **Grad-CAM** on a simple Convolutional Neural Network_
 
+------------------------------------
 ## **1. About the Project**
 
 * The MNIST databse [1] of handwritten digits has a training set of 60,000 examples. Each sample is a 28x28 black-and-white image, and one class per digit.  
@@ -13,6 +14,7 @@ Grad-CAM is a a class discriminative visualization technique [3], meaning that i
 
 For Example, given that the class of the image is "Dog", Grad-CAM is able to identify the parts of the image which contribute most to the identification of the image as that of a "Dog". 
 
+------------------------------------------------
 ## **2. Modus Operandi**
 _Elaborating on the  process of Model building and Grad-CAM_
 
@@ -45,6 +47,18 @@ $$\alpha_{k}^{c} = \frac{1}{Z}\Sigma_{i}\Sigma_{j} \frac{\partial y^{c}}{\partia
 
 With the Class Discriminative Localization map being given by: 
 $$L^{c}_{Grad-CAM} = ReLU(\Sigma_{k} \alpha_{k}^{c}A_k)$$
+
+A (qualitative) algorithm used to process Grad-CAM:
+
+1. Isolate the activation maps of the desired Conv layer: $A_{ij}^{k}$. 
+2. Find the gradient of the Class Scores (before softmax) with respect to the Activation Maps: $\frac{\partial y^{c}}{\partial A_{ij}^{k}}$.
+3. Calculate the neuron importance scores for that particular class: $\alpha_{k}^{c}$.
+4. Calculate the values of the localization map : $L^{c}_{Grad-CAM}$ 
+5. Plot the localization map, preferably overlayed onto the image.
+
+
+
+
 `PyTorch Hooks` were used to obtain the Activation maps from the desired layer.   
 
 
@@ -58,7 +72,7 @@ $$L^{c}_{Grad-CAM} = ReLU(\Sigma_{k} \alpha_{k}^{c}A_k)$$
 
 
 
-
+--------------------------------------
 
 
 ## **3. Results and Discussion**

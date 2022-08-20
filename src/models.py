@@ -17,35 +17,50 @@ class ConvolutionalNetwork(nn.Module):
         
 
     def network(self):
-        cnn = nn.Sequential(
+
+        CONV1 = nn.Sequential(
             # Conv Layer 1
             nn.Conv2d(in_channels=1, out_channels=12, kernel_size=5, stride=1, dtype=dtype),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=3),
-            
+            nn.MaxPool2d(kernel_size=3)
+        )
+    
+        CONV2 = nn.Sequential(
             # Conv Layer 2 
             nn.Conv2d(in_channels=12, out_channels=24, kernel_size=5, stride=1, dtype=dtype),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2),
+            nn.MaxPool2d(kernel_size=2)
+        ) 
 
+        FC1 = nn.Sequential(
             # Fully Connected Layer 1
             nn.Flatten(start_dim=1),
             nn.Linear(in_features=96, out_features=48, dtype=dtype),
-            nn.Sigmoid(),
+            nn.Sigmoid()
+        )
 
+        FC2 = nn.Sequential(
             # Fully Connected Layer 2
             nn.Linear(in_features=48, out_features=10, dtype=dtype),
             nn.LogSoftmax(dim=1)
         )
-        return cnn 
+
+        CNN = nn.Sequential(
+            CONV1,
+            CONV2,
+            FC1,
+            FC2
+        )
+
+        return CNN
         
         
 
 if __name__ == "__main__":
     model = ConvolutionalNetwork()
     
-    testdata = torch.randn(1, 28, 28, dtype=dtype)
+    testdata = torch.randn(64, 1, 28, 28, dtype=dtype)
     mlp = model.network()
-    preds = mlp(testdata)
+    print(mlp(testdata).shape)
 
     
