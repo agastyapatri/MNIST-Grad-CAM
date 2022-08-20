@@ -9,7 +9,7 @@ import torch.nn as nn
 from src.loadvis import Loader
 from src.loadvis import Visualizer
 from src.models import ConvolutionalNetwork
-from src.traintest import Trainer
+from src.traintest import TrainTest
 
 
 if __name__ == "__main__":
@@ -29,8 +29,12 @@ if __name__ == "__main__":
     
 
     #4. Initial Training cycle and Getting baselines
-    trainer = Trainer(network=cnn, num_epochs=10, learning_rate=0.01)
-    trainer.train_one_epoch(trainloader, epoch=0)
+    traintest = TrainTest(network=cnn, num_epochs=10, learning_rate=0.01)
+    # traintest.train_one_epoch(trainloader, epoch=0)
+    trained_network, training_loss = traintest.train_all_epochs(trainloader)
+
+    # 5. Testing the model on new data
+    traintest.test(network = trained_network, loader = testloader)
 
     
 
