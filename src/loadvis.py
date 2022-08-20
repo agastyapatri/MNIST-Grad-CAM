@@ -13,8 +13,6 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
 
-
-
 class Loader(nn.Module):
     """
     Class to load the MNIST data into PyTorch dataloaders
@@ -45,10 +43,6 @@ class Loader(nn.Module):
         testloader = DataLoader(dataset=testset, batch_size=self.batch_size, shuffle=True)
 
         return trainloader, testloader
-
-
-
-
 
 
 class Visualizer:
@@ -83,6 +77,7 @@ class Visualizer:
             plt.plot(xaxis, yaxis)
             plt.grid()
             plt.show()
+
 
 
 if __name__ == "__main__":

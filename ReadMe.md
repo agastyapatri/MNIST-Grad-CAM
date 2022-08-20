@@ -9,20 +9,22 @@ _This project aims at implementing **Grad-CAM** on a simple Convolutional Neural
 While a classification model featuring a (relatively simple) Convolutional Neural Network will be built, the main purpose is to implement **Grad-CAM** for self-edification
 
 ### **Grad-CAM, or _Gradient-Weighted Class Activation Mapping_.**
-Grad-CAM is a a class discriminative visualization technique [2], meaning that it produces a visualization which highlights the regions of the input image that are important for its classification into a certain label.  
+Grad-CAM is a a class discriminative visualization technique [3], meaning that it produces a visualization which highlights the regions of the input image that are important for its classification into a certain label.  
 
 For Example, given that the class of the image is "Dog", Grad-CAM is able to identify the parts of the image which contribute most to the identification of the image as that of a "Dog". 
 
 ## **2. Modus Operandi**
+_Elaborating on the  process of Model building and Grad-CAM_
+
 Crudely:
-    
 1. Create a ConvNet to classify MNIST.
 2. Measure how it performs.
 3. Implement Grad-CAM.
-4. Use Grad-CAM to see where the model is misclassifying the images.
-5. Improve Model 
-6. Report Results.
+4. Use Grad-CAM to visualize the important neurons for assigning a class.  
+5. Report Results.
 
+### **_ConvNet_**
+    
 While MNIST classification is the very first thing everyone cuts their teeth on, it is still useful to revisit the dataset with more sophistication, both as a programmer and as a practitioner. 
 
 Structure of the ConvNet built: 
@@ -36,7 +38,16 @@ Structure of the ConvNet built:
   7. Linear(in_features=1, out_features=2, bias=True)
   8. Softmax(dim=None)
 
-Model Performance: 
+### **_2.2 Grad-CAM_**
+
+Grad-CAM computes _neuron importance scores_ ($\alpha_{k}^{c}$) for each class $c$ and each filter $k$ [2]. $\alpha$ for class $c$, and filter $k$ is given by: 
+$$\alpha_{k}^{c} = \frac{1}{Z}\Sigma_{i}\Sigma_{j} \frac{\partial y^{c}}{\partial A_{ij}^{k}}$$
+
+With the Class Discriminative Localization map being given by: 
+$$L^{c}_{Grad-CAM} = ReLU(\Sigma_{k} \alpha_{k}^{c}A_k)$$
+`PyTorch Hooks` were used to obtain the Activation maps from the desired layer.   
+
+
 
 
 
@@ -51,17 +62,6 @@ Model Performance:
 
 
 ## **3. Results and Discussion**
-
-
-## **4. Notes**
-
-_Currently, a list of issues faced:_
-
-1. PyTorch's Conv2D class doesn't seem to be implemented for the datatype torch.float16. This datatype was chosen to alleviate performance burden at runtime, but float32 it is. 
-A quick search on StackOverflow reveals that float16 would have been slower anyway due to software conversion to float32, as I dont have tensor cores at hand. No idea about the veracity of this statement.
-
-2.   
-
 
 
 -----------------------------------
