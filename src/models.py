@@ -61,6 +61,5 @@ if __name__ == "__main__":
     
     testdata = torch.randn(64, 1, 28, 28, dtype=dtype)
     mlp = model.network()
-    print(mlp(testdata).shape)
 
     

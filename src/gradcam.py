@@ -1,45 +1,75 @@
 import numpy as np 
 import torch 
-import torch.nn as nn 
+import torch.nn as nn
+import matplotlib.pyplot as plt  
 dtype = torch.float32
+torch.manual_seed(1)
 
 
 class GradCAM(nn.Module):
     """
     Gradient Weighted Class Activation Mapping on a classification model.
+        ~ forward() extracts the required gradients. 
+        ~ activations(): getting activation map of final CONV Layer
+        ~ extract_gradients(): getting the gradient of the class score wrt activation map
+        ~ L_C(): finally computing the GradCAM scores
     """
 
-    def __init__(self, network, class_idx):
+    def __init__(self, network, class_idx, layer):
+
         super().__init__()
         self.net = network 
         self.target_class = class_idx 
         self.classes = range(10)
+        self.int_grad = None 
 
-    def activation_map(self, layer):
-        """
-        Function to find activation maps of the Desired Convolution Layer
-        :return A: The activation map of the desired convolution layer
-        """
-        print(layer)
-
-
-    def gradient(self):
-        """
-        Function to calculate the gradient of the class score of the desired class wrt the activation map 
-        """
-        pass 
-
-    def alpha_ck(self):
-        """
-        Function to calculate the neuron importance weights by global average pooling the gradients
-        """
-        pass 
+        # breaking down the network into usable chunks. 
+        self.CONV = nn.Sequential().append(self.net[0]).append(self.net[1][:2])
+        self.maxpool = nn.MaxPool2d(kernel_size=2) 
+        self.FC = self.net[2]
+        
     
-    def map(self):
-        """
-        Function to calculate the GradCAM scores for the class, and return a map which can be plotted.
-        """
+    def hook(self, gradients):
+        self.int_grad = gradients 
+
+
+    def forward(self, input_tensor):
+        # Getting output up to the ReLU() of CONV2
+        output = self.CONV(input_tensor)
+
+        # registering the hook
+        h = output.register_hook(self.hook)
+
+        # Maxpooling the output from ReLU() of CONV2
+        output = self.maxpool(output)
+
+        # Getting the output of the Fully Connected Layers
+        output = self.FC(output)
+
+        return output
+
+
+    def activations(self, input):
+        # 24 feature maps of 4x4 kernel
+        activation_map = self.CONV(input)
+        return activation_map 
+
+
+    def extract_gradients(self):
+        # There should be 24 gradients
+        return self.int_grad
+
+    def L_c(self, img):
+
+        # gradients = self.extract_gradients()
+
+        # A_ijk = self.activations(img)
+        # alpha_ck = None
+
+        # gradcamscores = max(torch.sum(torch.matmul(alpha_ck*A_ijk)) , 0)
         pass 
+
+
 
 
 if __name__ == "__main__":
@@ -71,17 +101,26 @@ if __name__ == "__main__":
         )
 
     CNN = nn.Sequential(
+        # Composing the different parts of the network together.
         CONV1,
         CONV2,
         FCLayers
     )
 
-    
-    testdata = torch.randn(64, 1,28, 28, dtype=dtype, requires_grad=True)
-
-    print(CNN[0][0].weight[0])
-
 
 
     
+    testdata = torch.randn(1, 1, 28, 28, dtype=dtype, requires_grad=True)
+    
+    gradcamtest = GradCAM(network=CNN, class_idx=None, layer=2)
+    preds = torch.argmax(gradcamtest(testdata))
+    # print(gradcamtest(testdata)[0][5])
+    print(preds.item())
+    
+
+    
+    
+
+
+
     

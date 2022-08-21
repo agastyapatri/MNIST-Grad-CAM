@@ -56,11 +56,13 @@ A (qualitative) algorithm used to process Grad-CAM:
 4. Calculate the values of the localization map : $L^{c}_{Grad-CAM}$ 
 5. Plot the localization map, preferably overlayed onto the image.
 
+* Extracting the gradients was tougher than anticipated, and took me on a soujourn through the nn.Sequential() API. Procedure was as followed:
+  1. Break the network down into the convolution part, and the fully connected part
+  2. Perform the forward pass until the ReLU() activation of the final CONV Layer.
+  3. Register a backward hook onto the intermediate output, in order to extract its gradient. 
+  4. Continue the forward pass through the Fully Connected Layers. 
 
-
-
-`PyTorch Hooks` were used to obtain the Activation maps from the desired layer.   
-
+*  
 
 
 
@@ -85,3 +87,37 @@ A (qualitative) algorithm used to process Grad-CAM:
 [2]: Selvaraju, R.R., Cogswell, M., Das, A., Vedantam, R., Parikh, D. and Batra, D. (2020). Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization. _International Journal of Computer Vision_, [online] 128(2), pp.336–359. doi:10.1007/s11263-019-01228-7.
 
 ‌[3] : [The Grad-CAM Website](http://gradcam.cloudcv.org/)
+
+
+----------------------------------------
+## **Notes**
+
+* __Hooks__: `PyTorch Hooks` were used to obtain the Activation maps from the desired layer. 
+    "Some operations need intermediary results to be saved during the forward pass in order to execute the backward pass. You can define how these saved tensors should be packed / unpacked using hooks" 
+1. Hooks are functions that automatically execute after a particular event. 
+2. PyTorch Hooks are registered for each Tensor or nn.Module object and are triggered by either the forward or backward pass of the object. 
+3. Each hook can modify the input, output or internal Module parameters. Most commonly, they are used for debugging. 
+4. The hook will be called everytime a gradient with respect to the Tensor is computed. 
+5. **We have to register the backward hook to the activation map of the last CONV layer in the model** In my case, it is going to be `CONV2`, including the activation `ReLU()` 
+6. It is also important to register the hook inside the forward() method, to avoid the issue of registering a hook to a duplicate tesnor and susequently losing the gradient. 
+7. Checkout: 
+
+    `from torchvision.models import vgg19`
+
+    `vgg = vgg19(pretrained=True)`
+
+    `print(vgg.features[:36])`
+
+
+8. The Hook is registered on the input value. 
+
+
+
+
+
+* __Gradients:__ .backward() called on a torch.Tensor calculates gradients. 
+  1. Call .backward() on the most probable logit, which is obatained by performing a single forward pass of the image through the network. 
+  2. Pytorch only caches the gradients of the leaf nodes in the computational graph, such as weights, biases and other parameters 
+
+
+* **class GradCAM:** givving the entire class a sample tensor as input (even though the init doesnt accept it as an argument) gives the same output as if the tensor was fed into the CNN, which _is_ an argument of the class. STRANGE.
