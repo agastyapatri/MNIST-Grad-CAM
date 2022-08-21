@@ -62,7 +62,14 @@ A (qualitative) algorithm used to process Grad-CAM:
   3. Register a backward hook onto the intermediate output, in order to extract its gradient. 
   4. Continue the forward pass through the Fully Connected Layers. 
 
-*  
+**YOLO TIME** 
+I'm confused about how to calculate gradients of the output logits wrt the activation maps. I cannot seem to figure out how to use hooks, even if my life depended on it. 
+
+Heres a hail mary:
+  1. Collect Activation maps
+  2. find logits of class
+  3. torch.autograd.grad(y_c.sum(), Activation_maps)
+  4. 
 
 
 

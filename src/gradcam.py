@@ -15,13 +15,13 @@ class GradCAM(nn.Module):
         ~ L_C(): finally computing the GradCAM scores
     """
 
-    def __init__(self, network, class_idx, layer):
+    def __init__(self, network, class_idx):
 
         super().__init__()
         self.net = network 
         self.target_class = class_idx 
         self.classes = range(10)
-        self.int_grad = None 
+        self.gradients = None 
 
         # breaking down the network into usable chunks. 
         self.CONV = nn.Sequential().append(self.net[0]).append(self.net[1][:2])
@@ -29,24 +29,26 @@ class GradCAM(nn.Module):
         self.FC = self.net[2]
         
     
-    def hook(self, gradients):
-        self.int_grad = gradients 
 
 
     def forward(self, input_tensor):
         # Getting output up to the ReLU() of CONV2
         output = self.CONV(input_tensor)
 
-        # registering the hook
-        h = output.register_hook(self.hook)
+        # registering the hook to the last activation map
+        output.register_backward_hook(lambda grad : )
 
         # Maxpooling the output from ReLU() of CONV2
         output = self.maxpool(output)
 
         # Getting the output of the Fully Connected Layers
         output = self.FC(output)
-
         return output
+
+
+    def extract_gradients(self):
+        # There should be 24 gradients
+        return self.gradients
 
 
     def activations(self, input):
@@ -55,18 +57,12 @@ class GradCAM(nn.Module):
         return activation_map 
 
 
-    def extract_gradients(self):
-        # There should be 24 gradients
-        return self.int_grad
 
-    def L_c(self, img):
+    def L_c(self, image):
 
-        # gradients = self.extract_gradients()
+        y_c = self.net(image)
+        A_ijk = self.activations(image)
 
-        # A_ijk = self.activations(img)
-        # alpha_ck = None
-
-        # gradcamscores = max(torch.sum(torch.matmul(alpha_ck*A_ijk)) , 0)
         pass 
 
 
@@ -109,13 +105,35 @@ if __name__ == "__main__":
 
 
 
+
+    a = torch.ones(1, 1, 28, 28, dtype=dtype, requires_grad=True)
+    b = torch.ones(1, 1, 28, 28, dtype=dtype, requires_grad=True)
     
-    testdata = torch.randn(1, 1, 28, 28, dtype=dtype, requires_grad=True)
+    gradcamtest = GradCAM(network=CNN, class_idx=None)
+    print(gradcamtest.extract_gradients())
+    # preds = torch.argmax(gradcamtest(a))
+    # print(gradcamtest.L_c(a))
+
+
     
-    gradcamtest = GradCAM(network=CNN, class_idx=None, layer=2)
-    preds = torch.argmax(gradcamtest(testdata))
-    # print(gradcamtest(testdata)[0][5])
-    print(preds.item())
+    
+
+
+
+
+
+    """TESTING STUFF"""
+    x = torch.tensor(np.ones([1,10]), requires_grad=True, dtype=dtype)
+    y = 2*x
+    y.register_hook(lambda grad: grad+1)
+
+
+  
+
+
+
+    
+
     
 
     
