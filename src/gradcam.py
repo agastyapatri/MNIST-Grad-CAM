@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt  
 dtype = torch.float32
+
 torch.manual_seed(1)
 
 
@@ -19,51 +20,44 @@ class GradCAM(nn.Module):
 
         super().__init__()
         self.net = network 
-        self.target_class = class_idx 
+        self.class_idx = class_idx 
         self.classes = range(10)
         self.gradients = None 
 
         # breaking down the network into usable chunks. 
-        self.CONV = nn.Sequential().append(self.net[0]).append(self.net[1][:2])
-        self.maxpool = nn.MaxPool2d(kernel_size=2) 
-        self.FC = self.net[2]
+        self.CONV = self.net[0]
+        self.FC = self.net[1] 
+
+
+
+
+    def L_GC(self, img, class_idx):
+        features = self.CONV(img)
+
+        # batches, num_feature_maps, height_of_feature_map, width_of_feature_map
+        _, N, H, W = features.size()
+        outputs = self.FC(features)
+        c_score = outputs[0, class_idx]
+
+        # gradients of output logits with respect to last feature maps 
+        grads = torch.autograd.grad(c_score, features)[0][0]
+
+        # finding neuron importance weights by averaging the height + weight
+        alphas = grads.mean(dim=-1).mean(dim=-1)
+
+
+        # Grad-CAM Scores by summing + applying relu
+        ReLU = lambda x: np.maximum(x, 0)
         
-    
+        # Grad_CAM Scores
+        features = torch.reshape(features, shape=(N, H*W))
+        L_c_intermediate = torch.matmul(alphas, features).detach().numpy()
+        L_c_intermediate = L_c_intermediate.reshape(H, W) 
+        L_c = np.maximum(L_c_intermediate, 0)
+
+        return L_c
 
 
-    def forward(self, input_tensor):
-        # Getting output up to the ReLU() of CONV2
-        output = self.CONV(input_tensor)
-
-        # registering the hook to the last activation map
-        output.register_backward_hook(lambda grad : )
-
-        # Maxpooling the output from ReLU() of CONV2
-        output = self.maxpool(output)
-
-        # Getting the output of the Fully Connected Layers
-        output = self.FC(output)
-        return output
-
-
-    def extract_gradients(self):
-        # There should be 24 gradients
-        return self.gradients
-
-
-    def activations(self, input):
-        # 24 feature maps of 4x4 kernel
-        activation_map = self.CONV(input)
-        return activation_map 
-
-
-
-    def L_c(self, image):
-
-        y_c = self.net(image)
-        A_ijk = self.activations(image)
-
-        pass 
 
 
 
@@ -71,14 +65,12 @@ class GradCAM(nn.Module):
 if __name__ == "__main__":
 
 
-    CONV1 = nn.Sequential(
+    CONV = nn.Sequential(
             # Conv Layer 1
             nn.Conv2d(in_channels=1, out_channels=12, kernel_size=5, stride=1, dtype=dtype),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=3)
-        )
-    
-    CONV2 = nn.Sequential(
+            nn.MaxPool2d(kernel_size=3),
+        
             # Conv Layer 2 
             nn.Conv2d(in_channels=12, out_channels=24, kernel_size=5, stride=1, dtype=dtype),
             nn.ReLU(),
@@ -98,8 +90,7 @@ if __name__ == "__main__":
 
     CNN = nn.Sequential(
         # Composing the different parts of the network together.
-        CONV1,
-        CONV2,
+        CONV,
         FCLayers
     )
 
@@ -109,23 +100,9 @@ if __name__ == "__main__":
     a = torch.ones(1, 1, 28, 28, dtype=dtype, requires_grad=True)
     b = torch.ones(1, 1, 28, 28, dtype=dtype, requires_grad=True)
     
-    gradcamtest = GradCAM(network=CNN, class_idx=None)
-    print(gradcamtest.extract_gradients())
-    # preds = torch.argmax(gradcamtest(a))
-    # print(gradcamtest.L_c(a))
+    gradcamtest = GradCAM(network=CNN, class_idx=5)
+    print(gradcamtest.gradcam(img=a, class_idx=5))
 
-
-    
-    
-
-
-
-
-
-    """TESTING STUFF"""
-    x = torch.tensor(np.ones([1,10]), requires_grad=True, dtype=dtype)
-    y = 2*x
-    y.register_hook(lambda grad: grad+1)
 
 
   
