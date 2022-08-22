@@ -2,6 +2,7 @@ import numpy as np
 import torch 
 import torch.nn as nn
 import matplotlib.pyplot as plt  
+from PIL import Image
 dtype = torch.float32
 
 torch.manual_seed(1)
@@ -16,17 +17,18 @@ class GradCAM(nn.Module):
         ~ L_C(): finally computing the GradCAM scores
     """
 
-    def __init__(self, network, class_idx):
+    def __init__(self, network):
 
         super().__init__()
         self.net = network 
-        self.class_idx = class_idx 
         self.classes = range(10)
         self.gradients = None 
 
         # breaking down the network into usable chunks. 
         self.CONV = self.net[0]
+
         self.FC = self.net[1] 
+
 
 
 
@@ -47,15 +49,31 @@ class GradCAM(nn.Module):
 
 
         # Grad-CAM Scores by summing + applying relu
-        ReLU = lambda x: np.maximum(x, 0)
-        
-        # Grad_CAM Scores
         features = torch.reshape(features, shape=(N, H*W))
         L_c_intermediate = torch.matmul(alphas, features).detach().numpy()
         L_c_intermediate = L_c_intermediate.reshape(H, W) 
         L_c = np.maximum(L_c_intermediate, 0)
 
         return L_c
+
+    def plotGCAM(self, image_batch):
+        image = image_batch[0][0].detach().numpy()
+        L_c = self.L_GC(img =image_batch, class_idx=3)
+        sal = Image.fromarray(L_c)
+        sal.resize(image.shape, resample=Image.LINEAR)
+
+        plt.title("test")
+        plt.axis("off")
+        # plt.imshow(image)
+        plt.imshow(np.array(sal), alpha=0.5, cmap="jet")
+        plt.show()
+        
+        
+
+        
+        
+
+    
 
 
 
@@ -73,11 +91,12 @@ if __name__ == "__main__":
         
             # Conv Layer 2 
             nn.Conv2d(in_channels=12, out_channels=24, kernel_size=5, stride=1, dtype=dtype),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)
+            nn.ReLU()
+
         ) 
 
     FCLayers = nn.Sequential(
+            nn.MaxPool2d(kernel_size=2),
             # Fully Connected Layer 1
             nn.Flatten(start_dim=1),
             nn.Linear(in_features=96, out_features=48, dtype=dtype),
@@ -100,8 +119,13 @@ if __name__ == "__main__":
     a = torch.ones(1, 1, 28, 28, dtype=dtype, requires_grad=True)
     b = torch.ones(1, 1, 28, 28, dtype=dtype, requires_grad=True)
     
-    gradcamtest = GradCAM(network=CNN, class_idx=5)
-    print(gradcamtest.gradcam(img=a, class_idx=5))
+    gradcamtest = GradCAM(network=CNN)
+    # print(gradcamtest.L_GC(img=a, class_idx=5))
+    # print(gradcamtest.plotGCAM(a))
+    gradcamtest.plotGCAM(a)
+
+
+
 
 
 

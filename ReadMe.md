@@ -30,7 +30,7 @@ Crudely:
 While MNIST classification is the very first thing everyone cuts their teeth on, it is still useful to revisit the dataset with more sophistication, both as a programmer and as a practitioner. 
 
 Structure of the ConvNet built: 
-    
+~~~   
   1. Conv2d(1, 12, kernel_size=(5, 5), stride=(1, 1), padding=(None, None))
   2. ReLU()
   3. MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
@@ -39,37 +39,28 @@ Structure of the ConvNet built:
   6. Sigmoid()
   7. Linear(in_features=1, out_features=2, bias=True)
   8. Softmax(dim=None)
+~~~
 
 ### **_2.2 Grad-CAM_**
 
-Grad-CAM computes _neuron importance scores_ ($\alpha_{k}^{c}$) for each class $c$ and each filter $k$ [2]. $\alpha$ for class $c$, and filter $k$ is given by: 
-$$\alpha_{k}^{c} = \frac{1}{Z}\Sigma_{i}\Sigma_{j} \frac{\partial y^{c}}{\partial A_{ij}^{k}}$$
+Grad-CAM computes _neuron importance scores_ ($\alpha$) for each class $c$ and each filter $k$ [2]. $\alpha$ for class $c$, and filter $k$ is given by: 
+$$\alpha^{c} = \frac{1}{Z}\Sigma_{i}\Sigma_{j} \frac{\partial y^{c}}{\partial A_{ij}^{k}}$$
 
 With the Class Discriminative Localization map being given by: 
-$$L^{c}_{Grad-CAM} = ReLU(\Sigma_{k} \alpha_{k}^{c}A_k)$$
+$$L^{c}= ReLU(\Sigma_{k} \alpha_{k}^{c}A_k)$$
 
 A (qualitative) algorithm used to process Grad-CAM:
 
-1. Isolate the activation maps of the desired Conv layer: $A_{ij}^{k}$. 
-2. Find the gradient of the Class Scores (before softmax) with respect to the Activation Maps: $\frac{\partial y^{c}}{\partial A_{ij}^{k}}$.
-3. Calculate the neuron importance scores for that particular class: $\alpha_{k}^{c}$.
-4. Calculate the values of the localization map : $L^{c}_{Grad-CAM}$ 
-5. Plot the localization map, preferably overlayed onto the image.
-
-* Extracting the gradients was tougher than anticipated, and took me on a soujourn through the nn.Sequential() API. Procedure was as followed:
-  1. Break the network down into the convolution part, and the fully connected part
-  2. Perform the forward pass until the ReLU() activation of the final CONV Layer.
-  3. Register a backward hook onto the intermediate output, in order to extract its gradient. 
-  4. Continue the forward pass through the Fully Connected Layers. 
-
-**YOLO TIME** 
-I'm confused about how to calculate gradients of the output logits wrt the activation maps. I cannot seem to figure out how to use hooks, even if my life depended on it. 
-
-Heres a hail mary:
-  1. Collect Activation maps
-  2. find logits of class
-  3. torch.autograd.grad(y_c.sum(), Activation_maps)
-  4. 
+  1. Break network into two parts: CONV (Convolutional) and FC (Fully Connected)
+  2. Get feature maps (A_c) by taking output of CONV
+  3. Get Class scores (y_c) by taking output of FC. IN the actual implementation, this will be the class prediction of the model.
+    
+  4. Calculate gradients of the clas scores with respect to feature maps using torch.autograd.grad(y_c, A_c).
+  5. Find neuron importance scores (alpha) by global average pooling the gradients in step 4. 
+  6. Reshape the activation maps to facilitate dot product
+  7. Calculate the dot product of alpha_c and A_c, and apply ReLU() to the product.
+   
+  Et Voila! 
 
 
 
