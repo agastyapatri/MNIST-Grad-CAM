@@ -20,23 +20,24 @@ if __name__ == "__main__":
     trainloader, testloader = loader.getdata()
 
 
-    # Function to get a single image from the dataloaders, and optionally plot it.
-    def getanimage(loader, plot=False):
-        """
-        Function to load one image from the dataloader
-        """
-        img_batch, label_batch  = next(iter(loader))
+    # Function to get a single image from the dataloaders based on its ground truth.
+    def getanimage(loader, class_idx, plot=False):
 
-        #getting the first image from the first batch 
-        image_tensor = img_batch[0]
-        label = label_batch[0]
+        image_batch, label_batch  = next(iter(loader))
+
+        #getting the desired from the first batch 
+        for i in range(len(label_batch)):
+            if label_batch[i] == class_idx:
+                image_tensor = image_batch[i]
 
         if plot == True:
-            plt.title(f"Image of the digit {label}")
-            plt.imshow(image_tensor[0], cmap="Reds")
+            plt.title(f"Image of the digit {class_idx}")
+            plt.imshow(image_tensor[0], cmap="Greys")
             plt.show()
 
-        return img_batch 
+        return image_tensor
+
+    # print(getanimage(loader=trainloader, class_idx=0, plot=False))
 
 
 
@@ -58,7 +59,7 @@ if __name__ == "__main__":
     trained_network, training_loss = traintest.train_all_epochs(trainloader)
 
     # 5. Testing the model on new data
-    traintest.test(network = trained_network, loader = testloader)
+    # traintest.test(network = trained_network, loader = testloader)
 
     # 6. Plotting the loss curve for the training cycle
     # visualizer.plotperf(training_loss, num_epochs = 10)
@@ -67,10 +68,10 @@ if __name__ == "__main__":
     # 7. Obtaining Grad-CAM for the model 
 
     gradcam = GradCAM(network=trained_network)
-    # gradcam.L_GC(img = None, class_idx=3)
-    image_batch = getanimage(trainloader)
-    gradcam.plotGCAM(image_batch=image_batch)
+    data = next(iter(trainloader))
+    print(gradcam.L_GC(image_data=data, class_name=3))
 
+    
 
 
     

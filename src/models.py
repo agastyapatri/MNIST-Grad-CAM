@@ -22,16 +22,17 @@ class ConvolutionalNetwork(nn.Module):
             # Conv Layer 1
             nn.Conv2d(in_channels=1, out_channels=12, kernel_size=5, stride=1, dtype=dtype),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=3),
+            nn.AvgPool2d(kernel_size=3),
 
             # Conv Layer 2 
             nn.Conv2d(in_channels=12, out_channels=24, kernel_size=5, stride=1, dtype=dtype),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2)
+            nn.ReLU()
+
         )
 
 
         FC = nn.Sequential(
+            nn.AvgPool2d(kernel_size=2),
             # Fully Connected Layer 1
             nn.Flatten(start_dim=1),
             nn.Linear(in_features=96, out_features=48, dtype=dtype),

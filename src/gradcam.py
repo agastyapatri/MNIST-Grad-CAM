@@ -33,32 +33,49 @@ class GradCAM(nn.Module):
 
 
 
-    def L_GC(self, img, class_idx):
-        features = self.CONV(img)
+    def L_GC(self, image_data, class_name):
+        image_batch, label_batch = image_data
+
+        # features: (64 x 24 x 4 x 4)
+        features = self.CONV(image_batch)
 
         # batches, num_feature_maps, height_of_feature_map, width_of_feature_map
         _, N, H, W = features.size()
+
+        # outputs : (64x10). choose the output for the desired class. 
         outputs = self.FC(features)
-        c_score = outputs[0, class_idx]
+
+        
+        # finding the outputs, features for the desired image index
+        for i in range(len(label_batch)):
+            if class_name == label_batch[i]:
+
+                # outputs(10) , features(24x4x4), image_tensor(1,28,28)
+                image_tensor = image_batch[i]
+                outputs_for_class = outputs[i]
+                features_for_class = features[i]
+         
+        c_score = outputs_for_class[class_name]
 
         # gradients of output logits with respect to last feature maps 
         grads = torch.autograd.grad(c_score, features)[0][0]
 
-        # finding neuron importance weights by averaging the height + weight
+        # finding neuron importance weights by global average pooling
         alphas = grads.mean(dim=-1).mean(dim=-1)
+        features_for_class = features_for_class.view(features_for_class.size(0), -1)
 
-
-        # Grad-CAM Scores by summing + applying relu
-        features = torch.reshape(features, shape=(N, H*W))
-        L_c_intermediate = torch.matmul(alphas, features).detach().numpy()
+        # Grad-CAM Scores by dot_product + applying relu
+        L_c_intermediate = torch.matmul(alphas, features_for_class).detach().numpy()
         L_c_intermediate = L_c_intermediate.reshape(H, W) 
         L_c = np.maximum(L_c_intermediate, 0)
 
         return L_c
 
-    def plotGCAM(self, image_batch):
-        image = image_batch[0][0].detach().numpy()
-        L_c = self.L_GC(img =image_batch, class_idx=3)
+"""
+    def plotGCAM(self, gcscores):
+        # image = image_batch[0][0].detach().numpy()
+        # image is the [28x28] tensor 
+        L_c = gcscores
         sal = Image.fromarray(L_c)
         sal.resize(image.shape, resample=Image.LINEAR)
 
@@ -68,7 +85,7 @@ class GradCAM(nn.Module):
         plt.imshow(np.array(sal), alpha=0.5, cmap="jet")
         plt.show()
         
-        
+"""        
 
         
         
@@ -116,13 +133,15 @@ if __name__ == "__main__":
 
 
 
-    a = torch.ones(1, 1, 28, 28, dtype=dtype, requires_grad=True)
-    b = torch.ones(1, 1, 28, 28, dtype=dtype, requires_grad=True)
+    a = torch.randn(64, 1, 28, 28, dtype=dtype, requires_grad=True)
+    b = torch.ones(1, 28, 28, dtype=dtype, requires_grad=True)
+
+    a_labels = torch.ones(64)
     
+
+    # testing for one image tensor of size (1,28,28)
     gradcamtest = GradCAM(network=CNN)
-    # print(gradcamtest.L_GC(img=a, class_idx=5))
-    # print(gradcamtest.plotGCAM(a))
-    gradcamtest.plotGCAM(a)
+    # print(gradcamtest.L_GC(image_data=(a, a_labels), class_name=1))
 
 
 

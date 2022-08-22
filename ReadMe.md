@@ -62,6 +62,10 @@ A (qualitative) algorithm used to process Grad-CAM:
    
   Et Voila! 
 
+New Problem: 
+  1. The model takes a batch input of size [64, 1, 28, 28]
+  2. REWRITE L_C in gradcam.py FOR A BATCH OF IMAGES, then index the desired scores with the desired class index
+
 
 
 
