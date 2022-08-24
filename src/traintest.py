@@ -92,6 +92,8 @@ class TrainTest(nn.Module):
             
             avg_loss = batch_loss/num_batches
 
+
+        torch.save(network.state_dict(), "/home/agastya123/PycharmProjects/DeepLearning/MNIST_GradCAM/figures_results/mnistclassifier.pth")
         print(f"Average Test Loss = {avg_loss}")
 
 

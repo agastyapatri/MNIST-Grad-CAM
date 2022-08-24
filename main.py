@@ -20,46 +20,32 @@ if __name__ == "__main__":
     trainloader, testloader = loader.getdata()
 
 
-    # Function to get a single image from the dataloaders based on its ground truth.
-    def getanimage(loader, class_idx, plot=False):
 
-        image_batch, label_batch  = next(iter(loader))
-
-        #getting the desired from the first batch 
-        for i in range(len(label_batch)):
-            if label_batch[i] == class_idx:
-                image_tensor = image_batch[i]
-
-        if plot == True:
-            plt.title(f"Image of the digit {class_idx}")
-            plt.imshow(image_tensor[0], cmap="Greys")
-            plt.show()
-
-        return image_tensor
 
     # print(getanimage(loader=trainloader, class_idx=0, plot=False))
 
 
 
     
-    #2. Visualizing the data
+    # #2. Visualizing the data
     visualizer = Visualizer()
     # visualizer.visualize(trainloader)
 
 
-    #3. Building the network 
+    # #3. Building the network 
     model = ConvolutionalNetwork()
     cnn = model.network()
-    
 
-    #4. Initial Training cycle and Getting baselines
+
+    # #4. Initial Training cycle and Getting baselines
     traintest = TrainTest(network=cnn, num_epochs=10, learning_rate=0.01)
 
     # traintest.train_one_epoch(trainloader, epoch=0)
     trained_network, training_loss = traintest.train_all_epochs(trainloader)
 
+
     # 5. Testing the model on new data
-    # traintest.test(network = trained_network, loader = testloader)
+    traintest.test(network = model, loader = testloader)
 
     # 6. Plotting the loss curve for the training cycle
     # visualizer.plotperf(training_loss, num_epochs = 10)

@@ -44,6 +44,23 @@ class Loader(nn.Module):
 
         return trainloader, testloader
 
+    # Function to get a single image from the dataloaders based on its ground truth.
+    def getanimage(loader, class_idx, plot=False):
+
+        image_batch, label_batch  = next(iter(loader))
+
+        #getting the desired from the first batch 
+        for i in range(len(label_batch)):
+            if label_batch[i] == class_idx:
+                image_tensor = image_batch[i]
+
+        if plot == True:
+            plt.title(f"Image of the digit {class_idx}")
+            plt.imshow(image_tensor[0], cmap="Greys")
+            plt.show()
+
+        return image_tensor
+
 
 class Visualizer:
     """
